@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
@@ -8,6 +8,8 @@ import axios from "axios";
 import { registerRoute } from "../utils/APIRoutes";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const [values, setValues] = useState({
     username: "",
     email: "",
@@ -26,15 +28,29 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (handleValidation()) {
-        const { username, email, password, confirmPassword } = values;
-        const {data} = await axios.post(registerRoute, {
+      console.log("In validation", registerRoute);
+      const { username, email, password } = values;
+      try {
+        const { data } = await axios.post(registerRoute, {
           username,
           email,
           password,
-        })
+        });
+  
+        if (data.status === false) {
+          toast.error(data.msg, toastOptions);
+        }
+  
+        if (data.status === true) {
+          localStorage.setItem('loli-app-user', JSON.stringify(data));
+        }
+        navigate("/");
+      } catch (error) {
+        // Handle any errors that occurred during the API request
+        console.error("An error occurred:", error);
+      }
     }
   };
-
   const handleValidation = () => {
     const { username, email, password, confirmPassword } = values;
     if (password !== confirmPassword) {
@@ -53,10 +69,14 @@ const Register = () => {
     return true;
   };
 
-  const handleChange = (e) => {
-    setValues({ ...values, [e.target.name]: e.target.value });
-    // console.log(values);
+  const handleChange = (event) => {
+    setValues({ ...values, [event.target.name]: event.target.value });
   };
+
+  useEffect(() => {
+    // console.log(values);
+  }, [values]);
+
 
   return (
     <>
@@ -87,7 +107,7 @@ const Register = () => {
           <input
             type="password"
             placeholder="confirm password"
-            name="confrmPassword"
+            name="confirmPassword"
             onChange={(e) => handleChange(e)}
           />
           <button type="submit">Create User</button>
