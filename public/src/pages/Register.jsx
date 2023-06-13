@@ -74,8 +74,10 @@ const Register = () => {
   };
 
   useEffect(() => {
-    // console.log(values);
-  }, [values]);
+    if (localStorage.getItem('loli-app-user')) {
+      navigate("/")
+    }
+  }, [navigate]);
 
 
   return (

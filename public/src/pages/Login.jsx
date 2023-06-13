@@ -26,7 +26,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (handleValidation()) {
-      // console.log("In validation", registerRoute);
       const { username, password } = values;
       try {
         const { data } = await axios.post(loginRoute, {
@@ -36,27 +35,25 @@ const Login = () => {
   
         if (data.status === false) {
           toast.error(data.msg, toastOptions);
+        } else {
+          localStorage.setItem('loli-app-user', JSON.stringify(data.user)); // Assuming user data is under the 'user' property
+          navigate("/");
         }
-  
-        if (data.status === true) {
-          localStorage.setItem('loli-app-user', JSON.stringify(data));
-        }
-        navigate("/");
       } catch (error) {
         // Handle any errors that occurred during the API request
         console.error("An error occurred:", error);
       }
     }
   };
+  
+  
+
   const handleValidation = () => {
     const { username, password } = values;
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match", toastOptions);
+    if (password === "" || username.length === 0) {
+      toast.error("Username and Password are required", toastOptions);
       return false;
-    } else if (username.length === ""){
-        toast.error("Email and Password are required", toastOptions);
-        return false;
-    } 
+    }
     return true;
   };
 
@@ -65,8 +62,10 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // console.log(values);
-  }, [values]);
+    if (localStorage.getItem('loli-app-user')) {
+      navigate("/")
+    }
+  }, [navigate]);
 
 
   return (
@@ -82,28 +81,19 @@ const Login = () => {
             placeholder="username"
             name="username"
             onChange={(e) => handleChange(e)}
+            min="3"
           />
-          <input
-            type="email"
-            placeholder="email"
-            name="email"
-            onChange={(e) => handleChange(e)}
-          />
+          
           <input
             type="password"
             placeholder="password"
             name="password"
             onChange={(e) => handleChange(e)}
           />
-          <input
-            type="password"
-            placeholder="confirm password"
-            name="confirmPassword"
-            onChange={(e) => handleChange(e)}
-          />
-          <button type="submit">Create User</button>
+          
+          <button type="submit">Login</button>
           <span>
-            Already have an account? <Link to="/login">Login</Link>
+            Don't have an account? <Link to="/register">Register</Link>
           </span>
         </form>
       </FormContainer>
